@@ -37,6 +37,8 @@
 // #include <mport.h>
 #include <histedit.h>
 
+#include "private.h"
+
 volatile sig_atomic_t gotsig = 0;
 
 static  unsigned char   complete(EditLine *, int);
@@ -80,16 +82,12 @@ int main (int argc, char **argv)
   el_set(el, EL_SIGNAL, 1);       
   el_set(el, EL_PROMPT, prompt);  
 
-  /* Tell editline to use this history interface  */
   el_set(el, EL_HIST, history, hist);
 
-  /* Add a user-defined function  */ 
   el_set(el, EL_ADDFN, "ed-complete", "Complete argument", complete);
-
-  /* Bind tab to it               */
   el_set(el, EL_BIND, "^I", "ed-complete", NULL);
 
-  el_source(el, NULL);
+  el_source(el, "mport");
   
   while ((buf = el_gets(el, &num)) != NULL && num != 0)  {
     int ac, cc, co;
@@ -112,6 +110,17 @@ int main (int argc, char **argv)
 
     history(hist, &ev, H_ENTER, buf);
 
+    (void)printf("av[0]: %s\n", av[0]);
+    
+    if (strcmp(av[0], "query") == 0) {
+      (void)printf("query!!\n");
+    } else if (strcmp(av[0], "help") == 0) {
+      (void)printf("query or help please!\n");
+    } else {
+      (void)printf("nope!\n");
+    }
+    
+    tok_reset(tok);
   }
 
   el_end(el);
