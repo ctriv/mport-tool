@@ -1,1 +1,1 @@
-void query(char **);
+void query(mportInstance *, char **, int);

@@ -26,10 +26,17 @@
  * $MidnightBSD: src/lib/libmport/version_cmp.c,v 1.3 2008/04/26 17:59:26 ctriv Exp $
  */
 
+#include <stdio.h>
+#include <mport.h>
+
 #include "private.h"
 
-void query(char **args) 
-{
 
+void query(mportInstance *mport, char **args, int argc) 
+{
+  int i;
+  for (i = 0; i<argc; i++) {
+    
+  }
 }
 

@@ -34,8 +34,10 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <unistd.h>
-// #include <mport.h>
+#include <mport.h>
 #include <histedit.h>
+#include <err.h>
+#include <sysexits.h>
 
 #include "private.h"
 
@@ -44,6 +46,8 @@ volatile sig_atomic_t gotsig = 0;
 static  unsigned char   complete(EditLine *, int);
 static  char   *prompt(EditLine *);
 static  void    sig(int);
+
+static void help(void);
 
 static char * prompt(EditLine *el)
 {  
@@ -66,12 +70,21 @@ int main (int argc, char **argv)
   Tokenizer *tok;
   History *hist;
   HistEvent ev;
-
+  mportInstance *mport;
+  
   (void) signal(SIGINT, sig); 
   (void) signal(SIGQUIT, sig);
   (void) signal(SIGHUP, sig); 
   (void) signal(SIGTERM, sig);
 
+  if ((mport = mport_instance_new()) == NULL) 
+    err(EX_OSERR, "mport: internal error: could not allocate mport instance");
+  
+  if (mport_instance_init(mport, NULL) != MPORT_OK) {
+    warnx("%s", mport_err_string());
+    exit(1);
+  }
+  
   hist = history_init();        
   history(hist, &ev, H_SETSIZE, 100);
 
@@ -108,16 +121,17 @@ int main (int argc, char **argv)
       continue;
     }
 
+    if (ac == 0) 
+      continue;
+
     history(hist, &ev, H_ENTER, buf);
 
-    (void)printf("av[0]: %s\n", av[0]);
-    
     if (strcmp(av[0], "query") == 0) {
-      (void)printf("query!!\n");
+      query(mport, (char **)(av + 1), ac - 1);
     } else if (strcmp(av[0], "help") == 0) {
-      (void)printf("query or help please!\n");
+      help();
     } else {
-      (void)printf("nope!\n");
+      help();
     }
     
     tok_reset(tok);
@@ -126,7 +140,8 @@ int main (int argc, char **argv)
   el_end(el);
   tok_end(tok);
   history_end(hist);
-
+  mport_instance_free(mport);
+  
   return (0);
 }
 
@@ -134,5 +149,12 @@ static unsigned char complete(EditLine *el, int key)
 {
   el_insertstr(el, "you hit tab");
   return CC_REFRESH;
+}
+
+
+static void help() 
+{
+  (void)printf("Commands:\n\n");
+  (void)printf("query <query string>\n");
 }
 
