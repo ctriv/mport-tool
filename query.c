@@ -37,7 +37,7 @@ void query(mportInstance *mport, char **args, int argc)
 {
   mportPackageMeta **packs;
   mportPackageMeta *pkg;
-
+  
   if (args[0] == NULL)
     return;
   
@@ -47,17 +47,33 @@ void query(mportInstance *mport, char **args, int argc)
   }
   
   if (packs == NULL) {
-    (void)printf("No packages installed matching %s\n", args[0]);
+    (void)fprintf(stderr, "No packages installed matching %s\n", args[0]);
     return;
   }
   
   if (*(packs + 1) == NULL) {
     /* only one package matched */
     pkg = *packs;
+    
+    if (mport_get_depends_from_master(mport, pkg) != MPORT_OK) {
+      warnx("Could not populate depends from master database: %s", mport_err_string());
+      return;
+    }
+  
     (void)printf("Package Name:        %s\n", pkg->name);
     (void)printf("Installed version:   %s\n", pkg->version);
     (void)printf("Port origin:         %s\n", pkg->origin);
     (void)printf("Installation prefix: %s\n", pkg->prefix);
+    
+    if (pkg->depends != NULL) {
+      (void)printf("Dependencies:\n");
+      int i = 0;
+      while (pkg->depends[i] != NULL) {
+        (void)printf("\t%s\n", pkg->depends[i]);
+        i++;
+      }      
+    }
+    
   } else {
     (void)printf("Installed packages matching %s\:\n", args[0]);
     int i;
@@ -66,6 +82,9 @@ void query(mportInstance *mport, char **args, int argc)
       (void)printf("\t%s %s\n", pkg->name, pkg->version);
     }
   }
+  
+  
+  (void)printf("\n");
   
   mport_packagemeta_vec_free(packs);
   
