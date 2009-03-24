@@ -154,7 +154,7 @@ static unsigned char complete(EditLine *el, int key)
 
 static void help() 
 {
-  (void)printf("Commands:\n\n");
-  (void)printf("query <query string>\n");
+  (void)printf("Commands:\n");
+  (void)printf("\tquery <query string>\n");
 }
 

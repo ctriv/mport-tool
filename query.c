@@ -28,15 +28,47 @@
 
 #include <stdio.h>
 #include <mport.h>
+#include <err.h>
 
 #include "private.h"
 
 
 void query(mportInstance *mport, char **args, int argc) 
 {
-  int i;
-  for (i = 0; i<argc; i++) {
-    
+  mportPackageMeta **packs;
+  mportPackageMeta *pkg;
+
+  if (args[0] == NULL)
+    return;
+  
+  if (mport_get_meta_from_master(mport, &packs, "pkg GLOB %Q", args[0]) != MPORT_OK) {
+    warnx("Could not execute query for %s: %s", args[0], mport_err_string());
+    return;
   }
+  
+  if (packs == NULL) {
+    (void)printf("No packages installed matching %s\n", args[0]);
+    return;
+  }
+  
+  if (*(packs + 1) == NULL) {
+    /* only one package matched */
+    pkg = *packs;
+    (void)printf("Package Name:        %s\n", pkg->name);
+    (void)printf("Installed version:   %s\n", pkg->version);
+    (void)printf("Port origin:         %s\n", pkg->origin);
+    (void)printf("Installation prefix: %s\n", pkg->prefix);
+  } else {
+    (void)printf("Installed packages matching %s\:\n", args[0]);
+    int i;
+    for (i=0; packs[i] != NULL; i++) {
+      pkg = packs[i];
+      (void)printf("\t%s %s\n", pkg->name, pkg->version);
+    }
+  }
+  
+  mport_packagemeta_vec_free(packs);
+  
+  return;      
 }
 
