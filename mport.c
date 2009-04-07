@@ -128,6 +128,8 @@ int main (int argc, char **argv)
 
     if (strcmp(av[0], "query") == 0) {
       query(mport, (char **)(av + 1), ac - 1);
+    } else if (strcmp(av[0], "delete") == 0) {
+      delete(mport, (char **)(av + 1), ac - 1);
     } else if (strcmp(av[0], "help") == 0) {
       help();
     } else {
