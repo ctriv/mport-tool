@@ -41,7 +41,7 @@ void query(mportInstance *mport, char **args, int argc)
   if (args[0] == NULL)
     return;
   
-  if (mport_get_meta_from_master(mport, &packs, "pkg GLOB %Q", args[0]) != MPORT_OK) {
+  if (mport_pkgmeta_search_master(mport, &packs, "pkg GLOB %Q", args[0]) != MPORT_OK) {
     warnx("Could not execute query for %s: %s", args[0], mport_err_string());
     return;
   }
@@ -55,7 +55,7 @@ void query(mportInstance *mport, char **args, int argc)
     /* only one package matched */
     pkg = *packs;
     
-    if (mport_get_depends_from_master(mport, pkg) != MPORT_OK) {
+    if (mport_pkgmeta_get_downdepends(mport, pkg) != MPORT_OK) {
       warnx("Could not populate depends from master database: %s", mport_err_string());
       return;
     }
@@ -86,7 +86,7 @@ void query(mportInstance *mport, char **args, int argc)
   
   (void)printf("\n");
   
-  mport_packagemeta_vec_free(packs);
+  mport_pkgmeta_vec_free(packs);
   
   return;      
 }

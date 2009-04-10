@@ -40,7 +40,7 @@ void delete(mportInstance *mport, char **args, int argc)
   if (args[0] == NULL)
     return;
   
-  if (mport_get_meta_from_master(mport, &pkgs, "pkg GLOB %Q", args[0]) != MPORT_OK) {
+  if (mport_pkgmeta_search_master(mport, &pkgs, "pkg GLOB %Q", args[0]) != MPORT_OK) {
     (void)fprintf(stderr, "Could not execute query for %s: %s\n", args[0], mport_err_string());
     return;
   }
@@ -55,7 +55,7 @@ void delete(mportInstance *mport, char **args, int argc)
       (void)fprintf(stderr, "Could not delete %s-%s: %s\n", pkgs[i]->name, pkgs[i]->version, mport_err_string());
   }
 
-  mport_packagemeta_vec_free(pkgs);
+  mport_pkgmeta_vec_free(pkgs);
   
   return;      
 }
