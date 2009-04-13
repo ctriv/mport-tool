@@ -37,7 +37,8 @@ void query(mportInstance *mport, char **args, int argc)
 {
   mportPackageMeta **packs;
   mportPackageMeta *pkg;
-  
+  mportPackageMeta **depends;
+    
   if (args[0] == NULL)
     return;
   
@@ -55,7 +56,7 @@ void query(mportInstance *mport, char **args, int argc)
     /* only one package matched */
     pkg = *packs;
     
-    if (mport_pkgmeta_get_downdepends(mport, pkg) != MPORT_OK) {
+    if (mport_pkgmeta_get_downdepends(mport, pkg, &depends) != MPORT_OK) {
       warnx("Could not populate depends from master database: %s", mport_err_string());
       return;
     }
@@ -65,11 +66,11 @@ void query(mportInstance *mport, char **args, int argc)
     (void)printf("Port origin:         %s\n", pkg->origin);
     (void)printf("Installation prefix: %s\n", pkg->prefix);
     
-    if (pkg->depends != NULL) {
+    if (depends != NULL) {
       (void)printf("Dependencies:\n");
       int i = 0;
-      while (pkg->depends[i] != NULL) {
-        (void)printf("\t%s\n", pkg->depends[i]);
+      while (depends[i] != NULL) {
+        (void)printf("\t%s\n", depends[i]->name);
         i++;
       }      
     }
